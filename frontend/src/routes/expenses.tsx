@@ -11,12 +11,14 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { Skeleton } from "@/components/ui/skeleton";
 
 export const Route = createFileRoute("/expenses")({
   component: Expenses,
 });
 
 async function getAllExpenses() {
+  //   await new Promise((r) => setTimeout(r, 2000));
   const res = await api.expenses.$get();
   if (!res.ok) {
     throw new Error("server error");
@@ -63,7 +65,21 @@ function Expenses() {
       </TableHeader>
       <TableBody>
         {isPending
-          ? "..."
+          ? Array(3)
+              .fill(0)
+              .map((_, i) => (
+                <TableRow key={i}>
+                  <TableCell className="font-medium">
+                    <Skeleton className="h-4" />
+                  </TableCell>
+                  <TableCell>
+                    <Skeleton className="h-4" />
+                  </TableCell>
+                  <TableCell className="text-right">
+                    <Skeleton className="h-4" />
+                  </TableCell>
+                </TableRow>
+              ))
           : data.expenses.map((expense) => (
               <TableRow key={expense.id}>
                 <TableCell className="font-medium">{expense.id}</TableCell>
