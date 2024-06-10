@@ -4,6 +4,8 @@ import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { useForm } from "@tanstack/react-form";
 import { api } from "@/lib/api";
+import { zodValidator } from "@tanstack/zod-form-adapter";
+import { createExpenseSchema } from "@server/shared-types";
 
 export const Route = createFileRoute("/_authenticated/add-expense")({
   component: AddExpense,
@@ -12,6 +14,7 @@ export const Route = createFileRoute("/_authenticated/add-expense")({
 function AddExpense() {
   const navigate = useNavigate();
   const form = useForm({
+    validatorAdapter: zodValidator,
     defaultValues: {
       title: "",
       amount: "",
@@ -42,9 +45,12 @@ function AddExpense() {
       >
         <form.Field
           name="title"
+          validators={{
+            onChange: createExpenseSchema.shape.title,
+          }}
           children={(field) => {
             return (
-              <>
+              <div>
                 <Label htmlFor={field.name}>Title</Label>
                 <Input
                   name={field.name}
@@ -59,15 +65,18 @@ function AddExpense() {
                   <em>{field.state.meta.touchedErrors}</em>
                 ) : null}
                 {field.state.meta.isValidating ? "Validating..." : null}
-              </>
+              </div>
             );
           }}
         />
         <form.Field
           name="amount"
+          validators={{
+            onChange: createExpenseSchema.shape.amount,
+          }}
           children={(field) => {
             return (
-              <>
+              <div>
                 <Label htmlFor={field.name}>Amount</Label>
                 <Input
                   type="number"
@@ -82,7 +91,7 @@ function AddExpense() {
                   <em>{field.state.meta.touchedErrors}</em>
                 ) : null}
                 {field.state.meta.isValidating ? "Validating..." : null}
-              </>
+              </div>
             );
           }}
         />
