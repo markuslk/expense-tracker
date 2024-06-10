@@ -14,7 +14,7 @@ function AddExpense() {
   const form = useForm({
     defaultValues: {
       title: "",
-      amount: 0,
+      amount: "",
     },
     onSubmit: async ({ value }) => {
       await new Promise((r) => setTimeout(r, 1000));
@@ -75,7 +75,7 @@ function AddExpense() {
                   name={field.name}
                   value={field.state.value}
                   onBlur={field.handleBlur}
-                  onChange={(e) => field.handleChange(Number(e.target.value))}
+                  onChange={(e) => field.handleChange(e.target.value)}
                   placeholder="Expense amount"
                 />
                 {field.state.meta.touchedErrors ? (

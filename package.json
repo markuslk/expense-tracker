@@ -1,7 +1,8 @@
 {
 	"scripts": {
 		"start": "tsx server/index.ts",
-		"dev": "tsx watch server/index.ts"
+		"dev": "tsx watch server/index.ts",
+		"migrate": "tsx migrate.ts"
 	},
 	"dependencies": {
 		"@hono/node-server": "^1.11.2",
