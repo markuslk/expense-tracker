@@ -11,14 +11,16 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import {
+  deleteExpense,
   getAllExpensesQueryOptions,
   getTotalSpentQueryOptions,
   loadingCreateExpenseQueryOptions,
 } from "@/lib/api";
 import { formatDateString } from "@/lib/utils";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
-import { Trash } from "lucide-react";
+import { Loader2, Trash } from "lucide-react";
+import { toast } from "sonner";
 
 export const Route = createFileRoute("/_authenticated/expenses")({
   component: Expenses,
@@ -91,9 +93,7 @@ function Expenses() {
                 <TableCell>{expense.title}</TableCell>
                 <TableCell className="text-right">{expense.amount}</TableCell>
                 <TableCell className="text-right">
-                  <Button variant={"ghost"}>
-                    <Trash className="h-4 w-4" />
-                  </Button>
+                  <DeleteExpenseButton id={expense.id} />
                 </TableCell>
               </TableRow>
             ))}
@@ -108,5 +108,49 @@ function Expenses() {
         </TableRow>
       </TableFooter>
     </Table>
+  );
+}
+
+function DeleteExpenseButton({ id }: { id: number }) {
+  const queryClient = useQueryClient();
+  const mutation = useMutation({
+    mutationFn: deleteExpense,
+    onError: () => {
+      toast("Error", {
+        description: `Failed to delete expense: ${id}`,
+      });
+    },
+    onSuccess: () => {
+      toast("Expense deleted", {
+        description: `Successfully deleted expense: ${id}`,
+      });
+
+      queryClient.setQueryData(
+        getAllExpensesQueryOptions.queryKey,
+        (existingExpenses) => ({
+          ...existingExpenses,
+          expenses: existingExpenses!.expenses.filter(
+            (expense) => expense.id !== id,
+          ),
+        }),
+      );
+      queryClient.refetchQueries({
+        queryKey: getTotalSpentQueryOptions.queryKey,
+        exact: true,
+      });
+    },
+  });
+  return (
+    <Button
+      variant={"ghost"}
+      disabled={mutation.isPending}
+      onClick={() => mutation.mutate({ id })}
+    >
+      {mutation.isPending ? (
+        <Loader2 className="h-4 w-4 animate-spin" />
+      ) : (
+        <Trash className="h-4 w-4" />
+      )}
+    </Button>
   );
 }
