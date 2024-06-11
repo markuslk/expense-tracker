@@ -1,9 +1,5 @@
-import {
-  getAllExpensesQueryOptions,
-  getTotalSpentQueryOptions,
-} from "@/lib/api";
-import { useQuery } from "@tanstack/react-query";
-import { createFileRoute } from "@tanstack/react-router";
+import { Button } from "@/components/ui/button";
+import { Skeleton } from "@/components/ui/skeleton";
 import {
   Table,
   TableBody,
@@ -14,8 +10,15 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Skeleton } from "@/components/ui/skeleton";
+import {
+  getAllExpensesQueryOptions,
+  getTotalSpentQueryOptions,
+  loadingCreateExpenseQueryOptions,
+} from "@/lib/api";
 import { formatDateString } from "@/lib/utils";
+import { useQuery } from "@tanstack/react-query";
+import { createFileRoute } from "@tanstack/react-router";
+import { Trash } from "lucide-react";
 
 export const Route = createFileRoute("/_authenticated/expenses")({
   component: Expenses,
@@ -28,6 +31,9 @@ function Expenses() {
     error: errorTotal,
     data: dataTotal,
   } = useQuery(getTotalSpentQueryOptions);
+  const { data: loadingCreateExpense } = useQuery(
+    loadingCreateExpenseQueryOptions,
+  );
 
   if (error) return "An error has occured:" + error.message;
 
@@ -40,9 +46,26 @@ function Expenses() {
           <TableHead>Date</TableHead>
           <TableHead>Title</TableHead>
           <TableHead className="text-right">Amount</TableHead>
+          <TableHead className="text-right">Actions</TableHead>
         </TableRow>
       </TableHeader>
       <TableBody>
+        {loadingCreateExpense?.expense && (
+          <TableRow>
+            <TableCell>
+              <Skeleton className="h-4" />
+            </TableCell>
+            <TableCell>
+              <Skeleton className="h-4" />
+            </TableCell>
+            <TableCell className="text-right">
+              <Skeleton className="h-4" />
+            </TableCell>
+            <TableCell className="text-right">
+              <Skeleton className="h-4 w-4" />
+            </TableCell>
+          </TableRow>
+        )}
         {isPending
           ? Array(3)
               .fill(0)
@@ -51,11 +74,14 @@ function Expenses() {
                   <TableCell>
                     <Skeleton className="h-4" />
                   </TableCell>
-                  <TableCell className="text-right">
+                  <TableCell>
                     <Skeleton className="h-4" />
                   </TableCell>
                   <TableCell className="text-right">
                     <Skeleton className="h-4" />
+                  </TableCell>
+                  <TableCell className="text-right">
+                    <Skeleton className="h-4 w-4" />
                   </TableCell>
                 </TableRow>
               ))
@@ -64,6 +90,11 @@ function Expenses() {
                 <TableCell>{formatDateString(expense.date)}</TableCell>
                 <TableCell>{expense.title}</TableCell>
                 <TableCell className="text-right">{expense.amount}</TableCell>
+                <TableCell className="text-right">
+                  <Button variant={"ghost"}>
+                    <Trash className="h-4 w-4" />
+                  </Button>
+                </TableCell>
               </TableRow>
             ))}
       </TableBody>
@@ -73,6 +104,7 @@ function Expenses() {
           <TableCell className="text-right">
             {isPendingTotal ? "..." : `${dataTotal.total}€`}
           </TableCell>
+          <TableCell />
         </TableRow>
       </TableFooter>
     </Table>

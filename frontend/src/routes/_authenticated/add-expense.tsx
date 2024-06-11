@@ -10,8 +10,10 @@ import {
   getAllExpensesQueryOptions,
   createExpense,
   getTotalSpentQueryOptions,
+  loadingCreateExpenseQueryOptions,
 } from "@/lib/api";
 import { useQueryClient } from "@tanstack/react-query";
+import { toast } from "sonner";
 
 export const Route = createFileRoute("/_authenticated/add-expense")({
   component: AddExpense,
@@ -28,24 +30,41 @@ function AddExpense() {
       date: new Date().toISOString(),
     },
     onSubmit: async ({ value }) => {
-      await new Promise((r) => setTimeout(r, 500));
       const existingExpenses = await queryClient.ensureQueryData(
         getAllExpensesQueryOptions,
       );
 
       navigate({ to: "/expenses" });
 
-      const newExpense = await createExpense({ value });
-
-      queryClient.setQueryData(getAllExpensesQueryOptions.queryKey, {
-        ...existingExpenses,
-        expenses: [newExpense, ...existingExpenses.expenses],
+      // loading state
+      queryClient.setQueryData(loadingCreateExpenseQueryOptions.queryKey, {
+        expense: value,
       });
 
-      queryClient.refetchQueries({
-        queryKey: getTotalSpentQueryOptions.queryKey,
-        exact: true,
-      });
+      try {
+        const newExpense = await createExpense({ value });
+
+        queryClient.setQueryData(getAllExpensesQueryOptions.queryKey, {
+          ...existingExpenses,
+          expenses: [newExpense, ...existingExpenses.expenses],
+        });
+
+        queryClient.refetchQueries({
+          queryKey: getTotalSpentQueryOptions.queryKey,
+          exact: true,
+        });
+
+        toast("Expense Created", {
+          description: `Successfully created new expense: ${newExpense.title}`,
+        });
+      } catch (err) {
+        toast("Error", {
+          description: `Failed to create new expense - ${err}`,
+        });
+      } finally {
+        // success state
+        queryClient.setQueryData(loadingCreateExpenseQueryOptions.queryKey, {});
+      }
     },
   });
 

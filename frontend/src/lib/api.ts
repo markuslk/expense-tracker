@@ -60,3 +60,13 @@ export async function createExpense({ value }: { value: CreateExpense }) {
   const newExpense = await res.json();
   return newExpense;
 }
+
+export const loadingCreateExpenseQueryOptions = queryOptions<{
+  expense?: CreateExpense;
+}>({
+  queryKey: ["loading-create-expense"],
+  queryFn: async () => {
+    return {};
+  },
+  staleTime: Infinity,
+});
