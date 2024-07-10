@@ -34,7 +34,7 @@ function AddExpense() {
         getAllExpensesQueryOptions,
       );
 
-      navigate({ to: "/expenses" });
+      navigate({ to: "/" });
 
       // loading state
       queryClient.setQueryData(loadingCreateExpenseQueryOptions.queryKey, {

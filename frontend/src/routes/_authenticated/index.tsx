@@ -1,6 +1,8 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { api } from "@/lib/api";
 import { useQuery } from "@tanstack/react-query";
+import ExpensesTable from "@/components/ExpensesTable";
+import { Skeleton } from "@/components/ui/skeleton";
 
 export const Route = createFileRoute("/_authenticated/")({
   component: Index,
@@ -24,8 +26,12 @@ function Index() {
   if (error) return "An error has occured:" + error.message;
 
   return (
-    <div className="mx-auto p-20 text-5xl">
-      Total spent: {isPending ? 0 : data.total}€
+    <div>
+      <div className="flex items-center p-12 text-3xl">
+        Total spent:{" "}
+        {isPending ? <Skeleton className="h-8 w-20" /> : `${data.total}€`}
+      </div>
+      <ExpensesTable />
     </div>
   );
 }
